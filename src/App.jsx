@@ -4,7 +4,6 @@ import PokeCard from './assets/components/PokeCard.jsx'
 import Search from '././assets/components/Search.jsx'
 
 function App() {
-  const [count, setCount] = useState(0)
 
   return (
     <>

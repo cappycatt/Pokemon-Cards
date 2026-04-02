@@ -4,7 +4,7 @@ import PokeCard from "../assets/components/PokeCard";
 import Search from "../assets/components/Search.jsx";
 import Pagination from "../assets/components/Pagination.jsx";
 import PokeCardSkeleton from "../assets/components/pokeCardSkeleton.jsx";
-import useDebounce from './debounce.jsx';
+import useDebounce from "./debounce.jsx";
 
 function ApiCall() {
   const [data, setData] = React.useState([]);
@@ -15,7 +15,7 @@ function ApiCall() {
   const [postPerPage] = React.useState(12);
   const [filterLoading, setFilterLoading] = React.useState(false);
   const debounceValue = useDebounce(search.replaceAll(" ", ""));
-  
+
   let filteredData = debounceValue
     ? data.filter((poke) =>
         poke.name.toLowerCase().includes(debounceValue.toLowerCase()),
@@ -61,20 +61,20 @@ function ApiCall() {
     fetchData();
   }, []);
 
-   React.useEffect(() => {
-     setCurrentPage(1);
+  React.useEffect(() => {
+    setCurrentPage(1);
 
     if (debounceValue) {
-       setFilterLoading(true);
-       const timer = setTimeout(() => {
-         setFilterLoading(false);
-       }, 300);
-       return () => clearTimeout(timer);
-     } else {
-       setFilterLoading(false);
-       setLoading(false);
-     }
-   }, [debounceValue]);
+      setFilterLoading(true);
+      const timer = setTimeout(() => {
+        setFilterLoading(false);
+      }, 300);
+      return () => clearTimeout(timer);
+    } else {
+      setFilterLoading(false);
+      setLoading(false);
+    }
+  }, [debounceValue]);
 
   let skeleton = Array.from({ length: 12 }).map((_, i) => (
     <PokeCardSkeleton key={i} />
@@ -83,10 +83,7 @@ function ApiCall() {
   return (
     <>
       {error && <p className="text-red">{error}</p>}
-      <Search
-        setSearch={setSearch}
-        search={search}
-      />
+      <Search setSearch={setSearch} search={search} />
       {loading || filterLoading ? (
         <div className="flex flex-wrap gap-4">{skeleton}</div>
       ) : (
