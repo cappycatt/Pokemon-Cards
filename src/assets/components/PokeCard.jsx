@@ -1,8 +1,9 @@
-function PokeCard({ name, image, weight, height, types }) {
+function PokeCard({ name, image, weight, height, types,onClick }) {
   if (!name) return <div>Something is wrong!</div>;
 
   return (
     <div
+    onClick={onClick}
       className=" cursor-pointer transform transition duration-300
                      hover:-translate-y-3 hover:shadow-4xl hover:scale-105bg-gray-100 shadow-xl rounded-xl h-fit w-100 p-4"
     >

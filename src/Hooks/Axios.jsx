@@ -1,10 +1,20 @@
-import React from "react";
 import axios from "axios";
 import PokeCard from "../assets/components/PokeCard";
 import Search from "../assets/components/Search.jsx";
 import Pagination from "../assets/components/Pagination.jsx";
 import PokeCardSkeleton from "../assets/components/pokeCardSkeleton.jsx";
+import React, { Suspense, lazy } from "react";
 import useDebounce from "./debounce.jsx";
+import LoadingPage from "../assets/components/Loading.jsx";
+
+const I_PokeCard = lazy(
+  () =>
+    new Promise((resolve) =>
+      setTimeout(() => {
+        resolve(import("../assets/components/I_PokeCard.jsx"));
+      }, 1000),
+    ),
+);
 
 function ApiCall() {
   const [data, setData] = React.useState([]);
@@ -15,6 +25,16 @@ function ApiCall() {
   const [postPerPage] = React.useState(12);
   const [filterLoading, setFilterLoading] = React.useState(false);
   const debounceValue = useDebounce(search.replaceAll(" ", ""));
+  const [selectedPokemon, setSelectedPokemon] = React.useState(null);
+  const [isLoading, setIsLoading] = React.useState(false);
+
+  const handleCardClick = (pokemon) => {
+    setIsLoading(true);
+    setSelectedPokemon(pokemon);
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 500);
+  };
 
   let filteredData = debounceValue
     ? data.filter((poke) =>
@@ -80,35 +100,61 @@ function ApiCall() {
     <PokeCardSkeleton key={i} />
   ));
 
+  const renderDetailView = () => (
+    <Suspense fallback={<LoadingPage />}>
+      {!isLoading ? (
+        <I_PokeCard
+          name={selectedPokemon.name}
+          types={selectedPokemon.types}
+          image={selectedPokemon.image}
+          weight={selectedPokemon.weight}
+          height={selectedPokemon.height}
+          onClose={() => setSelectedPokemon(null)}
+        />
+      ) : (
+        <LoadingPage />
+      )}
+    </Suspense>
+  );
+
+  const renderMainView = () => (
+    <>
+    <Search setSearch={setSearch} search={search} />
+
+          {loading || filterLoading ? (
+            <div className="flex flex-wrap gap-6 m-20">{skeleton}</div>
+          ) : (
+            <>
+              <div className="flex flex-wrap gap-6 m-20 ">
+                {currentPosts.map((pokemon, index) => (
+                  <PokeCard
+                    onClick={() => handleCardClick(pokemon)}
+                    key={index}
+                    name={pokemon.name}
+                    image={pokemon.image}
+                    weight={pokemon.weight}
+                    height={pokemon.height}
+                    types={pokemon.types}
+                  />
+                ))}
+              </div>
+
+              <Pagination
+                setCurrentPage={setCurrentPage}
+                totalPages={totalPages}
+                currentPage={currentPage}
+              />
+            </>
+          )}
+          </>)
+        
+
+
   return (
     <>
       {error && <p className="text-red">{error}</p>}
-      <Search setSearch={setSearch} search={search} />
-      {loading || filterLoading ? (
-        <div className="flex flex-wrap gap-4">{skeleton}</div>
-      ) : (
-        <>
-          <div className="flex flex-wrap gap-6 m-20">
-            {currentPosts.map((pokemon, index) => (
-              <PokeCard
-                key={index}
-                name={pokemon.name}
-                image={pokemon.image}
-                weight={pokemon.weight}
-                height={pokemon.height}
-                types={pokemon.types}
-              />
-            ))}
-          </div>
-
-          <Pagination
-            setCurrentPage={setCurrentPage}
-            totalPages={totalPages}
-            currentPage={currentPage}
-          />
-        </>
-      )}
-    </>
+      {selectedPokemon ? renderDetailView() : renderMainView()};  
+      </>   
   );
 }
 export default ApiCall;
